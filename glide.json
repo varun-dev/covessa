@@ -7,6 +7,11 @@
       "name": "city",
       "displayName": "City",
       "type": "string"
+    },
+    {
+      "name": "token",
+      "displayName": "Token",
+      "type": "string"
     }
   ],
   "result": {
