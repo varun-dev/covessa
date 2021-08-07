@@ -1,4 +1,4 @@
-window.__function = async function ({apikey}) {
+window.__function = async function (id, apikey) {
   const url = 'https://europe-west3-covessa-sql.cloudfunctions.net/covessa-mq-dev-covessamq'
   // const url = 'http://localhost:8080'
 
@@ -6,7 +6,7 @@ window.__function = async function ({apikey}) {
       'https://pubsub.googleapis.com/v1/projects/covessa-sql/subscriptions/acuity-new-booking-sub'
 
   // get token
-  const resp = await fetch (url+ '?apikey='+apikey)
+  const resp = await fetch (url+ '?apikey='+apikey.value)
   const r = await resp.json()
   console.log('token',r)
 

@@ -1,7 +1,7 @@
 {
   "name": "Weather",
-  "description": "Gets the current weather in a given city",
-  "author": "Mark Probst <mark@glideapps.com>",
+  "description": "Gets a message from Goole Pubsub",
+  "author": "Varun Dev <varun.dev@hotmail.com>",
   "params": [
     {
       "name": "id",
