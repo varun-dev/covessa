@@ -11,7 +11,7 @@ window.addEventListener("message", async function(event) {
 
   const response = { key };
   if (result !== undefined) {
-    response.result = { type: "string", value: JSON.stringify(result) };
+    response.result = { type: "string", value: result };
   }
 
   event.source.postMessage(response, "*");

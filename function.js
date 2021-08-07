@@ -25,12 +25,13 @@ window.__function = async function (id, apikey) {
     const resp = await fetch(url, { headers, body, method: 'POST' })
     const r = await resp.json()
     console.log('pull response', r)
-    await ackMessages(headers, r.receivedMessages)
-    return r.receivedMessages
+    const msgs = r.receivedMessages
+    if (!msgs || !msgs.length) return 'No booking'
+    await ackMessages(headers, msgs)
+    return msgs[0].message
   }
 
   async function ackMessages(headers, messages) {
-    if (!messages || !messages.length) return
     const url = apiUrl + ':acknowledge'
     const body = JSON.stringify({
       ackIds: messages.map(m => m.ackId),
