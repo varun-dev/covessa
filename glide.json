@@ -1,6 +1,6 @@
 {
-  "name": "Weather",
-  "description": "Gets a message from Goole Pubsub",
+  "name": "Messaging",
+  "description": "Gets a message from Google Pubsub",
   "author": "Varun Dev <varun.dev@hotmail.com>",
   "params": [
     {

@@ -8,7 +8,7 @@ window.__function = async function (id, apikey) {
   // get token
   const resp = await fetch (url+ '?apikey='+apikey.value)
   const r = await resp.json()
-  console.log('token',r)
+  // console.log('token',r)
 
   const messages = await getMessages(r)
 
@@ -24,10 +24,10 @@ window.__function = async function (id, apikey) {
 
     const resp = await fetch(url, { headers, body, method: 'POST' })
     const r = await resp.json()
-    console.log('pull response', r)
+    // console.log('pull response', r)
     const msgs = r.receivedMessages
     if (!msgs || !msgs.length) return 'No booking'
-    // await ackMessages(headers, msgs)
+    await ackMessages(headers, msgs)
     return JSON.stringify(msgs[0].message.attributes)
   }
 
@@ -38,6 +38,6 @@ window.__function = async function (id, apikey) {
     })
 
     const resp = await fetch(url, { headers, body, method: 'POST' })
-    console.log('ackResp', await resp.json())
+    // console.log('ackResp', await resp.json())
   }
 }
