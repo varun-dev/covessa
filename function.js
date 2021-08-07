@@ -27,7 +27,7 @@ window.__function = async function (id, apikey) {
     console.log('pull response', r)
     const msgs = r.receivedMessages
     if (!msgs || !msgs.length) return 'No booking'
-    await ackMessages(headers, msgs)
+    // await ackMessages(headers, msgs)
     return msgs[0].message
   }
 
