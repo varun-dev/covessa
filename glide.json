@@ -4,13 +4,13 @@
   "author": "Mark Probst <mark@glideapps.com>",
   "params": [
     {
-      "name": "city",
-      "displayName": "City",
+      "name": "id",
+      "displayName": "Id",
       "type": "string"
     },
     {
-      "name": "token",
-      "displayName": "Token",
+      "name": "apikey",
+      "displayName": "API Key",
       "type": "string"
     }
   ],

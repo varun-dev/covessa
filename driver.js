@@ -4,14 +4,14 @@ window.addEventListener("message", async function(event) {
 
   let result;
   try {
-    result = await window.function(...params);
+    result = await window.__function(...params);
   } catch (e) {
     result = undefined;
   }
 
   const response = { key };
   if (result !== undefined) {
-    response.result = { type: "string", value: result };
+    response.result = { type: "string", value: JSON.stringify(result) };
   }
 
   event.source.postMessage(response, "*");
