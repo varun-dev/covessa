@@ -1,6 +1,6 @@
 async function App(bookingId, apikey) {
-  if (!bookingId) return 'Booking ID is missing'
-  if (!apikey) return 'apikey missing'
+  if (!bookingId.value) return 'Booking ID is missing'
+  if (!apikey.value) return 'apikey missing'
 
   const urlToken = 'https://europe-west3-covessa-sql.cloudfunctions.net/covessa-mq-dev-covessamq'
   // const url = 'http://localhost:8080'
@@ -15,16 +15,16 @@ async function App(bookingId, apikey) {
   try {
     const resp = await fetch(urlToken + '?apikey=' + apikey.value)
     const headers = await resp.json()
-    const msgs = await getMessages(headers)
-    console.log('msgs', msgs)
-    if (!msgs || !msgs.length) return 'No booking'
-    await deleteTopic(headers)
-    return msgs[0].message.attributes.bookingId
+    const msg = await getMessage(headers, 4)
+    console.log('msg', msg)
+    // await deleteTopic(headers)
+    return msg
   } catch (e) {
     console.error(e)
   }
 
-  async function getMessages(headers) {
+  async function getMessage(headers, retry) {
+    console.log('Pulling message for', subName)
     const url = urlSub + ':pull'
     const body = JSON.stringify({
       returnImmediately: false,
@@ -32,8 +32,17 @@ async function App(bookingId, apikey) {
     })
     const resp = await fetch(url, { headers, body, method: 'POST' })
     const r = await resp.json()
-    // console.log('pull response', r)
-    return r.receivedMessages
+    console.log('pull response', r)
+    const msgs = r.receivedMessages
+    if (!msgs || !msgs.length) {
+      if (retry > 0) {
+        return await getMessage(headers, retry - 1)
+      } else {
+        return 'No booking'
+      }
+    } else {
+      return msgs[0].message.attributes.bookingId
+    }
   }
 
   async function ackMessages(headers, messages) {
@@ -45,6 +54,7 @@ async function App(bookingId, apikey) {
   }
 
   async function deleteTopic(headers) {
+    console.log('Cleaning up')
     try {
       await fetch(urlSub, { headers, method: 'DELETE' })
       await fetch(urlTopic, { headers, method: 'DELETE' })
