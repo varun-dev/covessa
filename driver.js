@@ -17,6 +17,5 @@ window.addEventListener('message', async function (event) {
     response.result = { type: 'string', value: result }
   }
 
-  console.log('Result', result)
-  // event.source.postMessage(response, '*')
+  event.source.postMessage(response, '*')
 })
