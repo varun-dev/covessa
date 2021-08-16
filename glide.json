@@ -4,8 +4,8 @@
   "author": "Varun Dev <varun.dev@hotmail.com>",
   "params": [
     {
-      "name": "id",
-      "displayName": "Id",
+      "name": "bookingId",
+      "displayName": "Booking ID",
       "type": "string"
     },
     {

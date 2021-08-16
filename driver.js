@@ -1,18 +1,22 @@
-window.addEventListener("message", async function(event) {
-  const { origin, data: { key, params } } = event;
-  // console.log("message", origin, key, params);
+window.addEventListener('message', async function (event) {
+  const {
+    origin,
+    data: { key, params },
+  } = event
+  console.log('message', origin, key, params)
 
-  let result;
+  let result
   try {
-    result = await window.__function(...params);
+    result = await window.__function(...params)
   } catch (e) {
-    result = undefined;
+    result = undefined
   }
 
-  const response = { key };
+  const response = { key }
   if (result !== undefined) {
-    response.result = { type: "string", value: result };
+    response.result = { type: 'string', value: result }
   }
 
-  event.source.postMessage(response, "*");
-});
+  console.log('Result', result)
+  // event.source.postMessage(response, '*')
+})
