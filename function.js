@@ -17,7 +17,7 @@ async function App(bookingId, apikey) {
     const headers = await resp.json()
     const msg = await getMessage(headers, 4)
     console.log('msg', msg)
-    // await deleteTopic(headers)
+    await deleteTopic(headers)
     return msg
   } catch (e) {
     console.error(e)
