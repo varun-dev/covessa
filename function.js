@@ -51,7 +51,7 @@ async function App(bookingId, apikey) {
         return msgs[0].message.attributes.bookingId
       }
     } else if (resp.status === 404) {
-      setTimeout(getMessage.bind(null, headers, retry), NOT_FOUND_RETRY_DELAY)
+      setTimeout(getMessage.bind(null, retry), NOT_FOUND_RETRY_DELAY)
     } else {
       return 'Error ' + resp.status
     }
