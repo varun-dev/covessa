@@ -12,40 +12,52 @@ async function App(bookingId, apikey) {
   const urlSub = `${urlApi}/${subName}`
   const urlTopic = `${urlApi}/${topicName}`
 
+  const PULL_RETRIES = 5
+  const NOT_FOUND_RETRY_DELAY = 2000
+
+  let headers
+
   try {
     const resp = await fetch(urlToken + '?apikey=' + apikey.value)
-    const headers = await resp.json()
-    const msg = await getMessage(headers, 4)
-    console.log('msg', msg)
-    await deleteTopic(headers)
+    headers = await resp.json()
+    await initialise()
+    const msg = await getMessage(PULL_RETRIES - 1)
+    console.info('msg', msg)
+    await destroy()
     return msg
   } catch (e) {
     console.error(e)
   }
 
-  async function getMessage(headers, retry) {
-    console.log('Pulling message for', subName)
+  async function getMessage(retry) {
+    console.info('Pulling message for', bookingId.value)
     const url = urlSub + ':pull'
     const body = JSON.stringify({
       returnImmediately: false,
       maxMessages: 10,
     })
+
     const resp = await fetch(url, { headers, body, method: 'POST' })
-    const r = await resp.json()
-    console.log('pull response', r)
-    const msgs = r.receivedMessages
-    if (!msgs || !msgs.length) {
-      if (retry > 0) {
-        return await getMessage(headers, retry - 1)
+    if (resp.status === 200) {
+      const { receivedMessages } = await resp.json()
+      console.info('receivedMessages', receivedMessages)
+      if (!receivedMessages || !receivedMessages.length) {
+        if (retry > 0) {
+          return await getMessage(headers, retry - 1)
+        } else {
+          return 'No booking'
+        }
       } else {
-        return 'No booking'
+        return msgs[0].message.attributes.bookingId
       }
+    } else if (resp.status === 404) {
+      setTimeout(getMessage.bind(null, headers, retry), NOT_FOUND_RETRY_DELAY)
     } else {
-      return msgs[0].message.attributes.bookingId
+      return 'Error ' + resp.status
     }
   }
 
-  async function ackMessages(headers, messages) {
+  async function ackMessages(messages) {
     const url = urlSub + ':acknowledge'
     const body = JSON.stringify({
       ackIds: messages.map(m => m.ackId),
@@ -53,14 +65,21 @@ async function App(bookingId, apikey) {
     await fetch(url, { headers, body, method: 'POST' })
   }
 
-  async function deleteTopic(headers) {
-    console.log('Cleaning up')
+  async function destroy() {
+    console.info('Destroying topic and subscription')
     try {
       await fetch(urlSub, { headers, method: 'DELETE' })
       await fetch(urlTopic, { headers, method: 'DELETE' })
     } catch (e) {
       console.error(e)
     }
+  }
+
+  async function initialise() {
+    console.info('Creating topic and subscription')
+    await fetch(urlTopic, { headers, method: 'PUT' })
+    const body = JSON.stringify({ topic: topicName })
+    await fetch(urlSub, { headers, method: 'PUT', body })
   }
 }
 

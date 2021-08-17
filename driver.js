@@ -3,7 +3,6 @@ window.addEventListener('message', async function (event) {
     origin,
     data: { key, params },
   } = event
-  console.log('message', origin, key, params)
 
   let result
   try {
