@@ -43,7 +43,7 @@ async function App(bookingId, apikey) {
       console.info('receivedMessages', receivedMessages)
       if (!receivedMessages || !receivedMessages.length) {
         if (retry > 0) {
-          return await getMessage(headers, retry - 1)
+          return await getMessage(retry - 1)
         } else {
           return 'No booking'
         }
