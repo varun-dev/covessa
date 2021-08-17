@@ -22,15 +22,16 @@ async function App(bookingId, apikey) {
     headers = await resp.json()
     await initialise()
     const msg = await getMessage(PULL_RETRIES - 1)
-    console.info('msg', msg)
+    console.debug('msg', msg)
     await destroy()
     return msg
   } catch (e) {
-    console.error(e)
+    console.debug(e)
+    return 'Error: ' + e.message
   }
 
   async function getMessage(retry) {
-    console.info('Pulling message for', bookingId.value)
+    console.debug('Pulling message for', bookingId.value)
     const url = urlSub + ':pull'
     const body = JSON.stringify({
       returnImmediately: false,
@@ -40,7 +41,7 @@ async function App(bookingId, apikey) {
     const resp = await fetch(url, { headers, body, method: 'POST' })
     if (resp.status === 200) {
       const { receivedMessages } = await resp.json()
-      console.info('receivedMessages', receivedMessages)
+      console.debug('receivedMessages', receivedMessages)
       if (!receivedMessages || !receivedMessages.length) {
         if (retry > 0) {
           return await getMessage(retry - 1)
@@ -66,7 +67,7 @@ async function App(bookingId, apikey) {
   }
 
   async function destroy() {
-    console.info('Destroying topic and subscription')
+    console.debug('Destroying topic and subscription')
     try {
       await fetch(urlSub, { headers, method: 'DELETE' })
       await fetch(urlTopic, { headers, method: 'DELETE' })
@@ -76,7 +77,7 @@ async function App(bookingId, apikey) {
   }
 
   async function initialise() {
-    console.info('Creating topic and subscription')
+    console.debug('Creating topic and subscription')
     await fetch(urlTopic, { headers, method: 'PUT' })
     const body = JSON.stringify({ topic: topicName })
     await fetch(urlSub, { headers, method: 'PUT', body })
