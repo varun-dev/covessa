@@ -1,6 +1,12 @@
 async function App(bookingId, apikey) {
-  if (!bookingId.value) return 'Booking ID is missing'
-  if (!apikey.value) return 'apikey missing'
+  if (!bookingId.value) {
+    log('Booking ID is missing')
+    return false
+  }
+  if (!apikey.value) {
+    log('apikey missing')
+    return false
+  }
 
   const urlToken = 'https://europe-west3-covessa-sql.cloudfunctions.net/covessa-mq-dev-covessamq'
   // const url = 'http://localhost:8080'
@@ -12,7 +18,7 @@ async function App(bookingId, apikey) {
   const urlSub = `${urlApi}/${subName}`
   const urlTopic = `${urlApi}/${topicName}`
 
-  const PULL_RETRIES = 5
+  const RETRIES = 5
   const NOT_FOUND_RETRY_DELAY = 2000
 
   let headers
@@ -21,17 +27,17 @@ async function App(bookingId, apikey) {
     const resp = await fetch(urlToken + '?apikey=' + apikey.value)
     headers = await resp.json()
     await initialise()
-    const msg = await getMessage(PULL_RETRIES - 1)
-    console.debug('Response: ', msg)
+    const msg = await getMessage(RETRIES - 1)
+    log('Response: ', msg)
     await destroy()
     return msg
   } catch (e) {
-    console.debug(e)
-    return 'Error: ' + e.message
+    log(e)
+    return false
   }
 
   async function getMessage(retry) {
-    console.debug('Pulling message for', bookingId.value)
+    log('Pulling message for', bookingId.value)
     const url = urlSub + ':pull'
     const body = JSON.stringify({
       returnImmediately: false,
@@ -41,20 +47,23 @@ async function App(bookingId, apikey) {
     const resp = await fetch(url, { headers, body, method: 'POST' })
     if (resp.status === 200) {
       const { receivedMessages } = await resp.json()
-      console.debug('receivedMessages', receivedMessages)
+      log('receivedMessages', receivedMessages)
       if (!receivedMessages || !receivedMessages.length) {
         if (retry > 0) {
           return await getMessage(retry - 1)
         } else {
-          return 'No booking'
+          log('No Booking')
+          return false
         }
       } else {
-        return receivedMessages[0].message.attributes.bookingId
+        const id = receivedMessages[0].message.attributes.bookingId
+        return id === bookingId.value
       }
     } else if (resp.status === 404 && retry > 0) {
       setTimeout(getMessage.bind(null, retry - 1), NOT_FOUND_RETRY_DELAY)
     } else {
-      return 'Error ' + resp.status
+      log('Error ' + resp.status)
+      return false
     }
   }
 
@@ -67,23 +76,27 @@ async function App(bookingId, apikey) {
   }
 
   async function destroy() {
-    console.debug('Destroying topic and subscription')
+    log('Destroying topic and subscription')
     try {
       await fetch(urlSub, { headers, method: 'DELETE' })
       await fetch(urlTopic, { headers, method: 'DELETE' })
     } catch (e) {
-      console.debug(e)
+      log(e)
     }
   }
 
   async function initialise() {
-    console.debug('Creating topic and subscription')
+    log('Creating topic and subscription')
     const respTopic = await fetch(urlTopic, { headers, method: 'PUT' })
-    if (respTopic.status === 409) console.debug('Topic already exist. This should not happen')
+    if (respTopic.status === 409) log('Topic already exist. This should not happen')
     const body = JSON.stringify({ topic: topicName })
     const respSub = await fetch(urlSub, { headers, method: 'PUT', body })
-    if (respSub.status === 409) console.debug('Subscription already exist. This should not happen')
+    if (respSub.status === 409) log('Subscription already exist. This should not happen')
   }
+}
+
+function log(...arg) {
+  console.debug(...arg)
 }
 
 window.__function = App
