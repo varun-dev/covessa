@@ -22,7 +22,7 @@ async function App(bookingId, apikey) {
     headers = await resp.json()
     await initialise()
     const msg = await getMessage(PULL_RETRIES - 1)
-    console.debug('msg', msg)
+    console.debug('Response: ', msg)
     await destroy()
     return msg
   } catch (e) {
@@ -49,7 +49,7 @@ async function App(bookingId, apikey) {
           return 'No booking'
         }
       } else {
-        return msgs[0].message.attributes.bookingId
+        return receivedMessages[0].message.attributes.bookingId
       }
     } else if (resp.status === 404) {
       setTimeout(getMessage.bind(null, retry), NOT_FOUND_RETRY_DELAY)
@@ -72,15 +72,17 @@ async function App(bookingId, apikey) {
       await fetch(urlSub, { headers, method: 'DELETE' })
       await fetch(urlTopic, { headers, method: 'DELETE' })
     } catch (e) {
-      console.error(e)
+      console.debug(e)
     }
   }
 
   async function initialise() {
     console.debug('Creating topic and subscription')
-    await fetch(urlTopic, { headers, method: 'PUT' })
+    const respTopic = await fetch(urlTopic, { headers, method: 'PUT' })
+    if (respTopic.status === 409) console.debug('Topic already exist. This should not happen')
     const body = JSON.stringify({ topic: topicName })
-    await fetch(urlSub, { headers, method: 'PUT', body })
+    const respSub = await fetch(urlSub, { headers, method: 'PUT', body })
+    if (respSub.status === 409) console.debug('Subscription already exist. This should not happen')
   }
 }
 
