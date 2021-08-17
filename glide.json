@@ -1,6 +1,6 @@
 {
   "name": "Messaging",
-  "description": "Gets a message from Google Pubsub (Ver 0.8)",
+  "description": "Gets a message from Google Pubsub (Ver 0.9)",
   "author": "Varun Dev <varun.dev@hotmail.com>",
   "params": [
     {
